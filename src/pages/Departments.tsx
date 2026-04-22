@@ -1,8 +1,11 @@
+import { useState, useEffect } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, Legend,
 } from 'recharts';
-import { departments, formatAED } from '../data/mockData';
+import { formatAED } from '../data/mockData';
+import { fetchDepartments } from '../api';
+import type { Department } from '../types';
 import ChartCard from '../components/ChartCard';
 
 interface TooltipItem { value: number; name: string; color: string }
@@ -34,14 +37,44 @@ const DeptTooltip = ({ active, payload, label }: {
   );
 };
 
-const chartData = departments.map(d => ({
-  name: d.name === 'Human Resources' ? 'HR' : d.name,
-  Budget: d.budget,
-  Actual: d.actual,
-  color: d.color,
-}));
-
 export default function Departments() {
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchDepartments()
+      .then(setDepartments)
+      .catch(err => setError(err.message ?? 'Failed to load data'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, color: '#8896B0', fontSize: 14 }}>
+      Loading…
+    </div>
+  );
+
+  if (error) return (
+    <div style={{
+      background: 'rgba(239,68,68,0.08)',
+      border: '1px solid rgba(239,68,68,0.25)',
+      borderRadius: 12,
+      padding: '20px 24px',
+      color: '#EF4444',
+      fontSize: 14,
+    }}>
+      Failed to load data: {error}
+    </div>
+  );
+
+  const chartData = departments.map(d => ({
+    name: d.name === 'Human Resources' ? 'HR' : d.name,
+    Budget: d.budget,
+    Actual: d.actual,
+    color: d.color,
+  }));
+
   return (
     <div>
       <div style={{ marginBottom: 28 }}>
@@ -49,7 +82,7 @@ export default function Departments() {
           Department Budgets
         </h1>
         <p style={{ color: '#8896B0', fontSize: 13, marginTop: 5 }}>
-          FY 2024 approved budget vs actual spend · 5 departments
+          FY 2024 approved budget vs actual spend · {departments.length} departments
         </p>
       </div>
 

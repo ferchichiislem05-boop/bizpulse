@@ -29,33 +29,33 @@ export const anomalies: Anomaly[] = [
     type: 'overspend',
     severity: 'high',
     department: 'Technology',
-    description:
+    message:
       'Cloud infrastructure costs exceeded forecast by 34.2% in November. Unoptimised batch-processing jobs ran continuously on production-grade instances without auto-scaling limits, resulting in AED 618K in unbudgeted cloud spend.',
     amount: 618_000,
-    delta: 34.2,
-    date: 'Nov 2024',
+    delta: '+34.2%',
+    month: 'Nov 2024',
   },
   {
     id: 'a2',
     type: 'overspend',
     severity: 'medium',
     department: 'Sales',
-    description:
+    message:
       'Q4 commission payouts exceeded the approved pool by 28.1% following an exceptional deal-closing sprint. Three enterprise contracts closed simultaneously in October, triggering a multi-tier accelerator payout not fully provisioned in the Q4 budget.',
     amount: 700_000,
-    delta: 28.1,
-    date: 'Oct–Nov 2024',
+    delta: '+28.1%',
+    month: 'Oct–Nov 2024',
   },
   {
     id: 'a3',
     type: 'miss',
     severity: 'medium',
     department: 'Marketing',
-    description:
+    message:
       'Summer digital campaign ROI fell 22.5% below the quarterly KPI threshold during June–July. Audience conversion rates on paid channels dropped sharply, attributed to reduced engagement during peak UAE summer travel and a competitive bid environment.',
     amount: 350_000,
-    delta: -22.5,
-    date: 'Jun–Jul 2024',
+    delta: '-22.5%',
+    month: 'Jun–Jul 2024',
   },
 ];
 

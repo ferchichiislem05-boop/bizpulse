@@ -1,8 +1,11 @@
+import { useState, useEffect } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer,
 } from 'recharts';
-import { revenueData, formatAED } from '../data/mockData';
+import { formatAED } from '../data/mockData';
+import { fetchRevenue } from '../api';
+import type { RevenueData } from '../types';
 import ChartCard from '../components/ChartCard';
 
 interface TooltipItem { value: number; name: string; color: string }
@@ -34,40 +37,70 @@ const RevenueTooltip = ({ active, payload, label }: {
   );
 };
 
-const bestMonth  = revenueData.reduce((a, b) => a.revenue > b.revenue ? a : b);
-const worstMonth = revenueData.reduce((a, b) => a.revenue < b.revenue ? a : b);
-const totalRev   = revenueData.reduce((s, d) => s + d.revenue, 0);
-const totalExp   = revenueData.reduce((s, d) => s + d.expenses, 0);
-const avgMargin  = (((totalRev - totalExp) / totalRev) * 100).toFixed(1);
-
-const statCards = [
-  {
-    label: 'Best Month',
-    value: `${bestMonth.month} — ${formatAED(bestMonth.revenue, true)}`,
-    sub: `AED ${((bestMonth.revenue - bestMonth.expenses) / 1_000_000).toFixed(2)}M net`,
-    color: '#10B981',
-    bg: 'rgba(16,185,129,0.08)',
-    border: 'rgba(16,185,129,0.2)',
-  },
-  {
-    label: 'Lowest Month',
-    value: `${worstMonth.month} — ${formatAED(worstMonth.revenue, true)}`,
-    sub: `${(((worstMonth.revenue / bestMonth.revenue) - 1) * 100).toFixed(1)}% below peak`,
-    color: '#F59E0B',
-    bg: 'rgba(245,158,11,0.08)',
-    border: 'rgba(245,158,11,0.2)',
-  },
-  {
-    label: 'Avg Gross Margin',
-    value: `${avgMargin}%`,
-    sub: 'Across all 12 months',
-    color: '#3B82F6',
-    bg: 'rgba(59,130,246,0.08)',
-    border: 'rgba(59,130,246,0.2)',
-  },
-];
-
 export default function Revenue() {
+  const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchRevenue()
+      .then(setRevenueData)
+      .catch(err => setError(err.message ?? 'Failed to load data'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, color: '#8896B0', fontSize: 14 }}>
+      Loading…
+    </div>
+  );
+
+  if (error) return (
+    <div style={{
+      background: 'rgba(239,68,68,0.08)',
+      border: '1px solid rgba(239,68,68,0.25)',
+      borderRadius: 12,
+      padding: '20px 24px',
+      color: '#EF4444',
+      fontSize: 14,
+    }}>
+      Failed to load data: {error}
+    </div>
+  );
+
+  const bestMonth  = revenueData.reduce((a, b) => a.revenue > b.revenue ? a : b);
+  const worstMonth = revenueData.reduce((a, b) => a.revenue < b.revenue ? a : b);
+  const totalRev   = revenueData.reduce((s, d) => s + d.revenue, 0);
+  const totalExp   = revenueData.reduce((s, d) => s + d.expenses, 0);
+  const avgMargin  = (((totalRev - totalExp) / totalRev) * 100).toFixed(1);
+
+  const statCards = [
+    {
+      label: 'Best Month',
+      value: `${bestMonth.month} — ${formatAED(bestMonth.revenue, true)}`,
+      sub: `AED ${((bestMonth.revenue - bestMonth.expenses) / 1_000_000).toFixed(2)}M net`,
+      color: '#10B981',
+      bg: 'rgba(16,185,129,0.08)',
+      border: 'rgba(16,185,129,0.2)',
+    },
+    {
+      label: 'Lowest Month',
+      value: `${worstMonth.month} — ${formatAED(worstMonth.revenue, true)}`,
+      sub: `${(((worstMonth.revenue / bestMonth.revenue) - 1) * 100).toFixed(1)}% below peak`,
+      color: '#F59E0B',
+      bg: 'rgba(245,158,11,0.08)',
+      border: 'rgba(245,158,11,0.2)',
+    },
+    {
+      label: 'Avg Gross Margin',
+      value: `${avgMargin}%`,
+      sub: 'Across all 12 months',
+      color: '#3B82F6',
+      bg: 'rgba(59,130,246,0.08)',
+      border: 'rgba(59,130,246,0.2)',
+    },
+  ];
+
   return (
     <div>
       <div style={{ marginBottom: 28 }}>

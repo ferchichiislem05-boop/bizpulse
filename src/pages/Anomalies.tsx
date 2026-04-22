@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { AlertTriangle, TrendingDown, Zap, BrainCircuit } from 'lucide-react';
-import { anomalies, formatAED } from '../data/mockData';
+import { formatAED } from '../data/mockData';
+import { fetchAnomalies } from '../api';
 import type { Anomaly } from '../types';
 
 const severityConfig: Record<Anomaly['severity'], { label: string; color: string; bg: string; border: string }> = {
@@ -15,6 +17,36 @@ const typeConfig: Record<Anomaly['type'], { label: string; Icon: typeof AlertTri
 };
 
 export default function Anomalies() {
+  const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchAnomalies()
+      .then(setAnomalies)
+      .catch(err => setError(err.message ?? 'Failed to load data'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, color: '#8896B0', fontSize: 14 }}>
+      Loading…
+    </div>
+  );
+
+  if (error) return (
+    <div style={{
+      background: 'rgba(239,68,68,0.08)',
+      border: '1px solid rgba(239,68,68,0.25)',
+      borderRadius: 12,
+      padding: '20px 24px',
+      color: '#EF4444',
+      fontSize: 14,
+    }}>
+      Failed to load data: {error}
+    </div>
+  );
+
   return (
     <div>
       <div style={{ marginBottom: 28 }}>
@@ -58,7 +90,6 @@ export default function Anomalies() {
           const sev  = severityConfig[anomaly.severity];
           const type = typeConfig[anomaly.type];
           const { Icon } = type;
-          const isNegativeDelta = anomaly.delta < 0;
 
           return (
             <div key={anomaly.id} style={{
@@ -103,7 +134,7 @@ export default function Anomalies() {
                         {sev.label}
                       </span>
                     </div>
-                    <div style={{ color: '#4B5A72', fontSize: 12, marginTop: 3 }}>{anomaly.date}</div>
+                    <div style={{ color: '#4B5A72', fontSize: 12, marginTop: 3 }}>{anomaly.month}</div>
                   </div>
                 </div>
 
@@ -113,14 +144,14 @@ export default function Anomalies() {
                     {formatAED(anomaly.amount, true)}
                   </div>
                   <div style={{ color: '#4B5A72', fontSize: 12, marginTop: 2 }}>
-                    {isNegativeDelta ? '' : '+'}{anomaly.delta.toFixed(1)}% variance
+                    {anomaly.delta} variance
                   </div>
                 </div>
               </div>
 
               {/* Description */}
               <p style={{ color: '#8896B0', fontSize: 13, lineHeight: 1.65, margin: 0 }}>
-                {anomaly.description}
+                {anomaly.message}
               </p>
             </div>
           );

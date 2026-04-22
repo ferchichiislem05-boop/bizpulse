@@ -1,12 +1,13 @@
+import { useState, useEffect } from 'react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts';
-import { revenueData, departments, kpis, formatAED } from '../data/mockData';
+import { formatAED } from '../data/mockData';
+import { fetchKPIs, fetchRevenue, fetchDepartments } from '../api';
+import type { KPI, RevenueData, Department } from '../types';
 import KPICard from '../components/KPICard';
 import ChartCard from '../components/ChartCard';
-
-const pieData = departments.map(d => ({ name: d.name, value: d.actual, color: d.color }));
 
 interface TooltipItem { value: number; name: string; color: string }
 
@@ -57,6 +58,44 @@ const PieTooltip = ({ active, payload }: {
 };
 
 export default function Overview() {
+  const [kpis, setKpis] = useState<KPI[]>([]);
+  const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    Promise.all([fetchKPIs(), fetchRevenue(), fetchDepartments()])
+      .then(([kpisData, revData, deptsData]) => {
+        setKpis(kpisData);
+        setRevenueData(revData);
+        setDepartments(deptsData);
+      })
+      .catch(err => setError(err.message ?? 'Failed to load data'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, color: '#8896B0', fontSize: 14 }}>
+      Loading…
+    </div>
+  );
+
+  if (error) return (
+    <div style={{
+      background: 'rgba(239,68,68,0.08)',
+      border: '1px solid rgba(239,68,68,0.25)',
+      borderRadius: 12,
+      padding: '20px 24px',
+      color: '#EF4444',
+      fontSize: 14,
+    }}>
+      Failed to load data: {error}
+    </div>
+  );
+
+  const pieData = departments.map(d => ({ name: d.name, value: d.actual, color: d.color }));
+
   return (
     <div>
       {/* Page header */}

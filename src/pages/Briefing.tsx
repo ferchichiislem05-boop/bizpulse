@@ -77,9 +77,9 @@ const slides: Slide[] = [
     title: `${anomalies.length} Anomalies Flagged — ${highAnomalies.length} Requiring Immediate Action`,
     headline: `Total anomaly financial impact: ${formatAED(totalAnomalyImpact, true)}`,
     bullets: [
-      `The Technology cloud spend spike (${formatAED(anomalies[0].amount, true)}, +${anomalies[0].delta}%) is the most critical issue. Root cause identified as untagged batch workloads bypassing budget alerting. A FinOps policy has been drafted for Q1 activation.`,
-      `Sales commission overrun (+${anomalies[1].delta}%) is an isolated Q4 outcome tied to accelerator clauses. Recommend restructuring the enterprise deal accelerator cap for FY 2025.`,
-      `Marketing Q3 ROI miss (${anomalies[2].delta}% below threshold) reflects an under-optimised summer channel mix. Attribution modelling and creative refresh are planned for H1 FY 2025.`,
+      `The Technology cloud spend spike (${formatAED(anomalies[0].amount, true)}, ${anomalies[0].delta}) is the most critical issue. Root cause identified as untagged batch workloads bypassing budget alerting. A FinOps policy has been drafted for Q1 activation.`,
+      `Sales commission overrun (${anomalies[1].delta}) is an isolated Q4 outcome tied to accelerator clauses. Recommend restructuring the enterprise deal accelerator cap for FY 2025.`,
+      `Marketing Q3 ROI miss (${anomalies[2].delta} below threshold) reflects an under-optimised summer channel mix. Attribution modelling and creative refresh are planned for H1 FY 2025.`,
       'No anomalies were detected in Operations or Human Resources — both departments maintained expenditure within approved thresholds for all 12 months.',
     ],
     recommendation:

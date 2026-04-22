@@ -19,10 +19,10 @@ export interface Anomaly {
   type: 'overspend' | 'miss' | 'spike';
   severity: 'high' | 'medium' | 'low';
   department: string;
-  description: string;
+  message: string;
   amount: number;
-  delta: number;
-  date: string;
+  delta: string;
+  month: string;
 }
 
 export interface KPI {
